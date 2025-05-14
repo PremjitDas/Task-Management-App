@@ -3,7 +3,7 @@ import {
   addTask,
   updateTask,
   deleteTask,
-} from "../controllers/user.controllers.js";
+} from "../controllers/task.controllers.js";
 
 import { userAuthVerification } from "../middlewares/auth.middlewares.js";
 
