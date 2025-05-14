@@ -29,7 +29,7 @@ const addTask = asyncHandler(async (req, res) => {
 
 const updateTask = asyncHandler(async (req, res) => {
 
-    const { title, description } = req.body;
+    const { title, description , id } = req.body;
 
     if (!title || !description)
     {
@@ -37,7 +37,7 @@ const updateTask = asyncHandler(async (req, res) => {
     }
 
     const task = await Task.findByIdAndUpdate(
-      req.user._id,
+      id,
       {
         $set: {
           title: title,
@@ -57,18 +57,9 @@ const updateTask = asyncHandler(async (req, res) => {
 
 const deleteTask = asyncHandler(async (req, res) => {
     
-    const deletetask = await Task.findByIdAndDelete(
-      req.user._id,
-      {
-        $unset: {
-          title: title,
-          description: description,
-        },
-      },
-      {
-        new: true,
-      }
-    ).select("-password");
+  const { id } = req.body;
+
+  const deletetask = await Task.findByIdAndDelete(id);
 
     return res
       .status(200)
