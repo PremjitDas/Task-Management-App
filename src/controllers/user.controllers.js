@@ -7,22 +7,6 @@ import jwt from "jsonwebtoken";
 
 
 
-const generateAccessTokenAndRefreshToken = async (userId) => {
-  try {
-    const user = await User.findById(userId);
-    const accessToken = process.env.ACCESS_TOKEN_SECRET;
-    const refreshToken = process.env.REFRESH_TOKEN_SECRET;
-
-    return { accessToken, refreshToken };
-
-  } catch (error) {
-    throw new ApiError(
-      500,
-      "Something went wrong while generating referesh and access token"
-    );
-  }
-};
-
 const registerUser = asyncHandler(async (req, res) => {
 
     const { username, email, password } = req.body;
