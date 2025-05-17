@@ -65,9 +65,9 @@ const LoginUser = asyncHandler(async (req, res) => {
   }
   const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-  res.cookie("Token", token, {
+  res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: true,
+    secure: false,
     sameSite: "strict",
   });
 
@@ -86,7 +86,11 @@ const LoginUser = asyncHandler(async (req, res) => {
 
 const LogoutUser = asyncHandler(async (req, res) => {
 
-  res.cookie("Token","")
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+  });
 
   return res
     .status(200)
