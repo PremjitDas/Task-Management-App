@@ -11,8 +11,8 @@ import { userAuthVerification } from "../middlewares/auth.middlewares.js";
 const router = Router();
 
 router.route("/addtask").post(userAuthVerification, addTask);
-router.route("/updatetask").post(userAuthVerification, updateTask);
-router.route("/deletetask").post(userAuthVerification, deleteTask);
+router.route("/updatetask").put(userAuthVerification, updateTask);
+router.route("/deletetask").delete(userAuthVerification, deleteTask);
 router.route("/gettask").get(getAllTask);
 
 export default router;
