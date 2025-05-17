@@ -1,12 +1,17 @@
 
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import RegistrationPage from './components/Registration_Page.jsx'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { RecoilRoot } from "recoil";
+import { BrowserRouter } from "react-router-dom";
+import "./index.css"
 
-createRoot(document.getElementById('root')).render(
-  <>
-    <App />
-    <RegistrationPage/>
-  </>,
-)
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <RecoilRoot>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </RecoilRoot>
+  </React.StrictMode>
+);
