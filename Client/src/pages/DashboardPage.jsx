@@ -3,13 +3,13 @@ import { useRecoilValue, useResetRecoilState } from "recoil";
 import { userAtom } from "../store/useAtom.js";
 import { useNavigate } from "react-router-dom";
 
-// Import all dashboard components
-import DashboardHeader from "../components/DashboardHeader.jsx";
-import DashboardStats from "../components/DashboardStats.jsx";
-import FilterSortBar from "../components/FilterSortBar.jsx";
-import TaskList from "../components/TaskList.jsx";
-import TaskModal from "../components/TaskModal.jsx";
-import AddTaskButton from "../components/AddTaskButton.jsx";
+// // Import all dashboard components
+// import DashboardHeader from "../components/DashboardHeader.jsx";
+// import DashboardStats from "../components/DashboardStats.jsx";
+// import FilterSortBar from "../components/FilterSortBar.jsx";
+// import TaskList from "../components/TaskList.jsx";
+// import TaskModal from "../components/TaskModal.jsx";
+// import AddTaskButton from "../components/AddTaskButton.jsx";
 
 export default function DashboardPage() {
   const user = useRecoilValue(userAtom);
