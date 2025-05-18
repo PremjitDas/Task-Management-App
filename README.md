@@ -23,7 +23,7 @@ A modern, web-based Task Management application that enables users to efficientl
 
 ```bash
 git clone https://github.com/PremjitDas/Task-Management-App.git
-cd TODO_PROJECT
+cd YOUR_FOLDER_NAME
 
 ```
 
