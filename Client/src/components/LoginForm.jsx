@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSetRecoilState, useRecoilValue } from "recoil";
 import { userAtom } from "../store/useAtom.js";
 import { Eye, EyeOff } from "lucide-react";
+import DotSpinner from "./DotSpinner"; // adjust the path as needed
+
 
 export default function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -150,7 +152,7 @@ export default function LoginForm() {
           disabled={loading}
           className="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? <DotSpinner /> : "Sign in"}
         </button>
       </form>
 

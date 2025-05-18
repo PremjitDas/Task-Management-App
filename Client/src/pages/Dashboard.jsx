@@ -13,46 +13,51 @@ import {
   Square,
   Search,
 } from "lucide-react";
+import DotSpinner from "../components/DotSpinner.jsx";
 
 export default function Dashboard() {
   const user = useRecoilValue(userAtom);
   const resetUser = useResetRecoilState(userAtom);
   const navigate = useNavigate();
+  
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [taskInput, setTaskInput] = useState({
     title: "",
     description: "",
-    completed: false,
+    isComplete: false,
   });
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const getAuthHeaders = () => ({
+    "Content-Type": "application/json",
+    ...(localStorage.getItem("token")
+      ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      : {}),
+  });
+
+  const handleApiErrors = (res) => {
+    if (res.status === 401) {
+      resetUser();
+      navigate("/login");
+      return true;
+    }
+    return false;
+  };
   const fetchTasks = async () => {
     setLoading(true);
     setError("");
     try {
       const res = await fetch("http://localhost:8080/api/v1/tasks/all", {
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(localStorage.getItem("token")
-            ? {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              }
-            : {}),
-        },
+        headers: getAuthHeaders(),
       });
 
       if (!res.ok) {
-        if (res.status === 401) {
-          console.error("Authentication error. Redirecting to login.");
-          resetUser();
-          navigate("/login");
-          return;
-        }
+        if (handleApiErrors(res)) return;
         throw new Error(`Server responded with status: ${res.status}`);
       }
 
@@ -70,6 +75,7 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (user && user._id) {
@@ -101,6 +107,46 @@ export default function Dashboard() {
     setSearchTerm(e.target.value);
   };
 
+  const toggleTaskCompletion = async (task) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/v1/tasks/toggle/${task._id}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          credentials: "include",
+          // Add body with the toggled isComplete status
+          body: JSON.stringify({
+            isComplete: !task.isComplete,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        if (handleApiErrors(res)) return;
+        throw new Error(`Server responded with status: ${res.status}`);
+      }
+
+      // Update local state immediately for better UX
+      setTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          t._id === task._id ? { ...t, isComplete: !t.isComplete } : t
+        )
+      );
+
+      // Refresh to get server state
+      await fetchTasks();
+    } catch (error) {
+      console.error("Error updating task completion:", error);
+      setError("Failed to update task status. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addOrUpdateTask = async (e) => {
     e.preventDefault();
     setError("");
@@ -120,28 +166,17 @@ export default function Dashboard() {
 
       const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(localStorage.getItem("token")
-            ? {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              }
-            : {}),
-        },
+        headers: getAuthHeaders(),
         credentials: "include",
         body: JSON.stringify(taskInput),
       });
 
       if (!res.ok) {
-        if (res.status === 401) {
-          resetUser();
-          navigate("/login");
-          return;
-        }
+        if (handleApiErrors(res)) return;
         throw new Error(`Server responded with status: ${res.status}`);
       }
 
-      setTaskInput({ title: "", description: "", completed: false });
+      setTaskInput({ title: "", description: "", isComplete: false });
       setEditingTaskId(null);
       await fetchTasks();
     } catch (error) {
@@ -151,7 +186,7 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
+  
   const deleteTask = async (taskId) => {
     setLoading(true);
     setError("");
@@ -162,23 +197,12 @@ export default function Dashboard() {
         {
           method: "DELETE",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            ...(localStorage.getItem("token")
-              ? {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }
-              : {}),
-          },
+          headers: getAuthHeaders(),
         }
       );
 
       if (!res.ok) {
-        if (res.status === 401) {
-          resetUser();
-          navigate("/login");
-          return;
-        }
+        if (handleApiErrors(res)) return;
         throw new Error(`Server responded with status: ${res.status}`);
       }
 
@@ -186,48 +210,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error deleting task:", error);
       setError("Failed to delete task. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleTaskCompletion = async (task) => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const updatedTask = { ...task, completed: !task.completed };
-
-      const res = await fetch(
-        `http://localhost:8080/api/v1/tasks/update/${task._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(localStorage.getItem("token")
-              ? {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }
-              : {}),
-          },
-          credentials: "include",
-          body: JSON.stringify(updatedTask),
-        }
-      );
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          resetUser();
-          navigate("/login");
-          return;
-        }
-        throw new Error(`Server responded with status: ${res.status}`);
-      }
-
-      await fetchTasks();
-    } catch (error) {
-      console.error("Error updating task completion:", error);
-      setError("Failed to update task status. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -337,17 +319,30 @@ export default function Dashboard() {
                 className="flex items-center justify-center space-x-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors flex-1"
               >
                 {editingTaskId ? (
+                  loading ? (
+                    <>
+                      <DotSpinner />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit2 size={16} />
+                      <span>Update Task</span>
+                    </>
+                  )
+                ) : loading ? (
                   <>
-                    <Edit2 size={16} />
-                    <span>{loading ? "Updating..." : "Update Task"}</span>
+                    <DotSpinner />
+                    <span>Adding...</span>
                   </>
                 ) : (
                   <>
                     <Plus size={16} />
-                    <span>{loading ? "Adding..." : "Add Task"}</span>
+                    <span>Add Task</span>
                   </>
                 )}
               </button>
+
               {editingTaskId && (
                 <button
                   type="button"
@@ -355,7 +350,7 @@ export default function Dashboard() {
                     setTaskInput({
                       title: "",
                       description: "",
-                      completed: false,
+                      isComplete: false,
                     });
                     setEditingTaskId(null);
                   }}
@@ -430,10 +425,10 @@ export default function Dashboard() {
                     <div className="flex items-start space-x-3 flex-1">
                       <button
                         onClick={() => toggleTaskCompletion(task)}
-                        className="mt-1 text-gray-400 hover:text-blue-500 transition-colors"
+                        className="mt-1 text-gray-400 hover:text-green-500 transition-colors"
                       >
-                        {task.completed ? (
-                          <CheckSquare size={20} className="text-blue-500" />
+                        {task.isComplete ? (
+                          <CheckSquare size={20} className="text-green-500" />
                         ) : (
                           <Square size={20} />
                         )}
@@ -441,7 +436,7 @@ export default function Dashboard() {
                       <div className="flex-1">
                         <h3
                           className={`font-medium ${
-                            task.completed
+                            task.isComplete
                               ? "line-through text-gray-500"
                               : "text-white"
                           }`}
@@ -451,7 +446,9 @@ export default function Dashboard() {
                         {task.description && (
                           <p
                             className={`text-sm mt-1 ${
-                              task.completed ? "text-gray-600" : "text-gray-400"
+                              task.isComplete
+                                ? "text-gray-600"
+                                : "text-gray-400"
                             }`}
                           >
                             {task.description}
@@ -465,7 +462,7 @@ export default function Dashboard() {
                           setTaskInput({
                             title: task.title,
                             description: task.description,
-                            completed: task.completed,
+                            isComplete: task.isComplete,
                           });
                           setEditingTaskId(task._id);
                         }}
@@ -493,4 +490,5 @@ export default function Dashboard() {
       </div>
     </div>
   );
+  
 }

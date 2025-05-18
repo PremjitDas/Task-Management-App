@@ -2,11 +2,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import DotSpinner from "./DotSpinner"; // adjust the path to match your project
+
 
 export default function RegisterForm() {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,9 +18,9 @@ export default function RegisterForm() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await fetch("http://localhost:8080/api/v1/users/register", {
         method: "POST",
@@ -32,8 +35,11 @@ export default function RegisterForm() {
       }
     } catch (error) {
       alert("Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <form
@@ -150,9 +156,16 @@ export default function RegisterForm() {
       {/* Submit Button */}
       <button
         type="submit"
+        disabled={loading}
         className="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
       >
-        <span className="mr-2">+</span> Register
+        {loading ? (
+          <DotSpinner />
+        ) : (
+          <>
+            <span className="mr-2">+</span> Register
+          </>
+        )}
       </button>
 
       {/* Link to Login */}

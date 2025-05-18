@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 
-
+// REGISTER USER
 const registerUser = asyncHandler(async (req, res) => {
 
     const { username, email, password } = req.body;
@@ -46,6 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     
 });
 
+// LOGIN USER
 const LoginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -84,6 +85,7 @@ const LoginUser = asyncHandler(async (req, res) => {
     );
 });
 
+// LOGOUT USER
 const LogoutUser = asyncHandler(async (req, res) => {
 
   res.clearCookie("accessToken", {
