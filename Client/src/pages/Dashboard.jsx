@@ -11,6 +11,7 @@ import {
   X,
   CheckSquare,
   Square,
+  Search,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const resetUser = useResetRecoilState(userAtom);
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [taskInput, setTaskInput] = useState({
     title: "",
     description: "",
@@ -55,12 +58,14 @@ export default function Dashboard() {
 
       const data = await res.json();
       setTasks(data.data || []);
+      setFilteredTasks(data.data || []);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       setError(
         "Failed to load tasks. Please check your connection and login status."
       );
       setTasks([]);
+      setFilteredTasks([]);
     } finally {
       setLoading(false);
     }
@@ -74,8 +79,26 @@ export default function Dashboard() {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredTasks(tasks);
+    } else {
+      const filtered = tasks.filter(
+        (task) =>
+          task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (task.description &&
+            task.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredTasks(filtered);
+    }
+  }, [searchTerm, tasks]);
+
   const handleInputChange = (e) => {
     setTaskInput({ ...taskInput, [e.target.name]: e.target.value });
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const addOrUpdateTask = async (e) => {
@@ -354,25 +377,52 @@ export default function Dashboard() {
             <p className="text-gray-400 text-sm mb-4">
               Manage and track your tasks
             </p>
+
+            {/* Search Input */}
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={16} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
           </div>
 
-          {loading && !tasks.length && (
+          {loading && !filteredTasks.length && !tasks.length && (
             <div className="flex justify-center items-center p-8 text-gray-400">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mr-3"></div>
               <span>Loading tasks...</span>
             </div>
           )}
 
-          {tasks.length === 0 && !loading ? (
+          {filteredTasks.length === 0 && !loading ? (
             <div className="text-center p-12 text-gray-400">
-              <CheckCircle className="mx-auto mb-4 text-gray-600" size={48} />
-              <p className="mb-2">No tasks found</p>
-              <p className="text-sm">Add a new task to get started</p>
+              {searchTerm && tasks.length > 0 ? (
+                <>
+                  <Search className="mx-auto mb-4 text-gray-600" size={48} />
+                  <p className="mb-2">No tasks match your search</p>
+                  <p className="text-sm">Try a different search term</p>
+                </>
+              ) : (
+                <>
+                  <CheckCircle
+                    className="mx-auto mb-4 text-gray-600"
+                    size={48}
+                  />
+                  <p className="mb-2">No tasks found</p>
+                  <p className="text-sm">Add a new task to get started</p>
+                </>
+              )}
             </div>
           ) : (
             <div className="px-6 pb-6">
               <div className="divide-y divide-gray-700">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <div
                     key={task._id}
                     className="py-4 flex items-start justify-between"
