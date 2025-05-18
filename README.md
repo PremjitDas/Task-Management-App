@@ -52,9 +52,11 @@ npm run dev
 - Create a .env file in the server directory and add the following:
 
 ```bash
-# Create environment variables
- touch .env 
-# (Edit .env file with your MongoDB credentials)
+PORT=8080
+NODE_ENV=development
+MONGO_URI= mongodb://localhost:27017/todoDb
+DATABASE_NAME = todoDb
+FRONTEND_URL = http://localhost:5173	
 ```
 
 ## 🌐 Frontend (Client)
