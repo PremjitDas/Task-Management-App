@@ -22,7 +22,7 @@ A modern, web-based Task Management application that enables users to efficientl
 ### 📦 Clone the Repository
 
 ```bash
-git clone https://github.com/PremjitDas/Task-Management-App.git
+https://github.com/PremjitDas/fullstack-task-manager-assignment.git
 cd YOUR_FOLDER_NAME
 
 ```
